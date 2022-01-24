@@ -17,7 +17,7 @@ checkpkg() {
 	makepkg -doc &&
 	. PKGBUILD &&
 	(( "$(vercmp "$pkgver" "$oldpkgver")" > 0 )) &&
-	echo "$pkgver" > .toupd
+	echo "$pkgver-$pkgrel" > .toupd
 }
 
 for pkg in $(pacman -Qq | grep -- '-git'); do
