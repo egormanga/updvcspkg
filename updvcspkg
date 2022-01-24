@@ -1,0 +1,40 @@
+#!/bin/bash
+# updvcspkg
+
+TMPDIR='/tmp/updvcspkg'
+
+mkdir -p "$TMPDIR" &&
+cd "$TMPDIR" || exit
+
+checkpkg() {
+	git clone "https://aur.archlinux.org/$1.git"
+
+	cd "$1" &&
+	rm -f .toupd &&
+	. PKGBUILD &&
+	declare -F 'pkgver' &&
+	oldpkgver="$pkgver" &&
+	makepkg -doc &&
+	. PKGBUILD &&
+	(( "$(vercmp "$pkgver" "$oldpkgver")" > 0 )) &&
+	echo "$pkgver" > .toupd
+}
+
+for pkg in $(pacman -Qq | grep -- '-git'); do
+	checkpkg "$pkg" 3>&2 &>/dev/null &
+done; wait
+
+for i in *; do
+	[ -e "$i/.toupd" ] || continue
+
+	if [ -t 0 ] || [ "$1" == '--color=always' ]; then
+		echo -e "$(pacman -Q "$i" --color=always) -> \e[1;31m$(cat "$i/.toupd")\e[0m"
+	else
+		echo "$(pacman -Q "$i") -> $(cat "$i/.toupd")"
+	fi
+done
+
+ls | xargs safe-rm -rf
+
+# by Sdore, 2022
+#  www.sdore.me
