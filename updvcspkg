@@ -15,8 +15,6 @@ checkpkgver() {
 	. PKGBUILD &&
 	declare -F 'pkgver' &&
 
-	(( "$(vercmp "$pkgver-$pkgrel" "$2")" >= 0 )) &&
-
 	makepkg -doc &&
 	. PKGBUILD &&
 
