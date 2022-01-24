@@ -34,7 +34,7 @@ for i in *; do
 	fi
 done
 
-ls | xargs safe-rm -rf
+rm -rf "$TMPDIR"
 
 # by Sdore, 2022
 #  www.sdore.me
