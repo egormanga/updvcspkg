@@ -6,23 +6,28 @@ TMPDIR='/tmp/updvcspkg'
 mkdir -p "$TMPDIR" &&
 cd "$TMPDIR" || exit
 
-checkpkg() {
+checkpkgver() {
 	git clone "https://aur.archlinux.org/$1.git"
 
 	cd "$1" &&
 	rm -f .toupd &&
+
 	. PKGBUILD &&
 	declare -F 'pkgver' &&
-	oldpkgver="$pkgver" &&
+
+	(( "$(vercmp "$pkgver-$pkgrel" "$2")" >= 0 )) &&
+
 	makepkg -doc &&
 	. PKGBUILD &&
-	(( "$(vercmp "$pkgver" "$oldpkgver")" > 0 )) &&
+
+	(( "$(vercmp "$pkgver-$pkgrel" "$2")" > 0 )) &&
 	echo "$pkgver-$pkgrel" > .toupd
 }
 
-for pkg in $(pacman -Qq | grep -- '-git'); do
-	checkpkg "$pkg" 3>&2 &>/dev/null &
-done; wait
+IFS=$'\n'; for pkg in $(pacman -Q | grep -- '-git'); do
+	unset IFS
+	checkpkgver $pkg &>/dev/null &
+done; unset IFS; wait
 
 for i in *; do
 	[ -e "$i/.toupd" ] || continue
