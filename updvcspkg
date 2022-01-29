@@ -6,6 +6,12 @@ TMPDIR='/tmp/updvcspkg'
 mkdir -p "$TMPDIR" &&
 cd "$TMPDIR" || exit
 
+export BUILDDIR=./
+export PKGDEST=./
+export SRCDEST=./
+export SRCPKGDEST=./
+export LOGDEST=./
+
 checkpkgver() {
 	git clone "https://aur.archlinux.org/$1.git"
 
